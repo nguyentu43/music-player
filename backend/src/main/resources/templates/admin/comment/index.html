@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html
+	th:replace="fragments/admin_layout :: admin_layout(title='Comment', active_item='Comment', main=~{::#main}, scripts=~{::#scripts})">
+<body>
+	<div class="container-fluid" id="main">
+		<h1 class="h3 mb-2 text-gray-800">Comment</h1>
+		<div class="card shadow mb-4">
+			<!-- Card Header - Dropdown -->
+			<div
+				class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h6 class="m-0 font-weight-bold text-primary">Comment List</h6>
+				<div class="dropdown no-arrow">
+					<a class="dropdown-toggle" href="#" role="button"
+						id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+						aria-expanded="false"> <i
+						class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+					</a>
+					<div
+						class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+						aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-header">Menu</div>
+						<a class="dropdown-item" th:href="@{/admin/comment/create}" href="#">Create</a>
+					</div>
+				</div>
+			</div>
+			<!-- Card Body -->
+			<div class="card-body">
+				<div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>User</th>
+                                            <th>Content</th>
+                                            <th>Enable</th>
+                                            <th>Type</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    
+                                    <tbody>
+                                        <tr th:each="comment : ${comments}">
+                                            <td th:text="${comment.id}">Tiger Nixon</td>
+                                            <td th:text="${comment.user.name}">System Architect</td>
+                                            <td th:utext="${comment.content}">System Architect</td>
+                                             <td th:text="${comment.enable}">System Architect</td>
+                                            <td th:text="${comment.commentable_type}">System Architect</td>
+                                            <td th:text="${#dates.format(comment.created_at, 'dd/MMM/yyyy HH:mm')}">System Architect</td>
+                                            <td>
+                                            	<a class="btn btn-circle btn-success" th:href="| /admin/comment/${comment.id}/edit |"><i class="fas fa-pencil-alt"></i></a>
+                                            	<form class="d-inline" th:action="| /admin/comment/${comment.id}/delete |" method="post">
+                                            		<button class="btn-admin-delete btn btn-circle btn-danger"><i class="fas fa-trash"></i></button>
+                                            	</form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+			</div>
+		</div>
+	</div>
+	<div id="scripts">
+	    <!-- Page level custom scripts -->
+	    <script th:src="@{/js/admin.js}"></script>
+	</div>
+</body>
+</html>

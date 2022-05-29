@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	th:replace="fragments/admin_layout :: admin_layout(title='Song', active_item='Song', main=~{::#main}, scripts=~{::#scripts})">
+<body>
+	<div class="container-fluid" id="main">
+		<h1 class="h3 mb-2 text-gray-800">Song</h1>
+		<div class="card shadow mb-4">
+			<!-- Card Header - Dropdown -->
+			<div
+				class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h6 class="m-0 font-weight-bold text-primary"
+					th:text="${song.id} == null ? 'Create Song' : 'Edit Song'">Song
+					List</h6>
+			</div>
+			<!-- Card Body -->
+			<div class="card-body">
+				<div class="col-sm-12 col-md-9">
+					<form class="user" id="form-submit" method="post" th:action="@{/admin/song/save}"
+						th:object="${song}">
+						<div class="form-group">
+							<div class="custom-control custom-checkbox small">
+								<input type="checkbox" class="custom-control-input"
+									th:field="*{enable}" id="customCheck"> <label
+									class="custom-control-label" for="customCheck">Enable</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label">Name</label> <input type="text"
+								class="form-control form-control-user" id="name"
+								th:field="*{name}" placeholder="Name">
+						</div>
+						<div class="form-group">
+							<label class="control-label">Slug</label> <input type="text"
+								class="form-control form-control-user" id="slug"
+								th:field="*{slug}" placeholder="Slug">
+						</div>
+						<div class="form-group">
+							<label class="control-label">Lyric</label>
+							<div class="input-group">
+								<input type="text" class="form-control form-control-user"
+									id="lyric" name="lyric" th:value="*{lyric}" placeholder="Lyric">
+								<button class="btn btn-primary btn-user" id="btn-change-lyric">Change
+									Lyric</button>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label">Cover Image</label>
+							<div class="input-group">
+								<input type="text" class="form-control form-control-user"
+									id="cover" name="cover" placeholder="Cover" th:value="*{cover}">
+								<button class="btn btn-primary btn-user" id="btn-change-cover">Change
+									Cover</button>
+							</div>
+							<img width="180px" class="img-thumbnail mt-2" th:if="${!#strings.isEmpty(song.cover)}" th:src="*{cover}"/>
+						</div>
+						<div class="form-group" th:if="${song.id} != null">
+							<label class="control-label">Tags</label> <select
+								class="form-control form-control-user" id="tags"
+								th:field="*{tagIds}" multiple>
+								<option th:each="tag : ${tags}" th:value="${tag.id}"
+									th:text="${tag.name}"
+									th:selected="${#lists.contains(song.tagIds, tag.id)}"></option>
+							</select>
+						</div>
+						<div class="form-group" th:if="${song.id} != null">
+							<label class="control-label">Attributes</label> <select
+								class="form-control form-control-user" id="attrs"
+								th:field="*{attributeValueIds}" multiple>
+								<option th:each="item : ${attributeValues}"
+									th:value="${item.id}"
+									th:text="|${item.attribute.name}: ${item.value}|"
+									th:selected="${#lists.contains(song.attributeValueIds, item.id)}"></option>
+							</select>
+						</div>
+
+						<div class="table-responsive" th:if="${song.id} != null">
+							<div
+								class="d-flex justify-content-between mb-1 align-items-center">
+								<label class="control-label">Files</label>
+								<button class="btn-add btn btn-circle btn-primary">
+									<i class="fas fa-plus"></i>
+								</button>
+							</div>
+
+							<table class="table table-bordered form-table" width="100%"
+								cellspacing="0">
+								<thead>
+									<tr>
+										<th>Id</th>
+										<th>FileName</th>
+										<th>Preview</th>
+										<th>Url</th>
+										<th>Enable</th>
+										<th>Created At</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="item, state : ${song.files}">
+										<td th:text="${state.index + 1}">Tiger Nixon</td>
+										<td><input class="form-control" style="width:250px" th:name="|files[${state.index}].filename|" th:value="${item.filename}" type="text"/></td>
+										<td>
+											<audio controls>
+												<source th:src="@{${item.url}}" type="audio/mpeg"/>
+											</audio>
+										</td>
+										<td><a th:href="${item.url}">Link</a></td>
+										<td><input th:name="|files[${state.index}].enable|"
+											type="checkbox" th:checked="${item.enable}" /> <input
+											th:name="|files[${state.index}].id|" type="hidden"
+											th:value="${item.id}" /></td>
+										<td
+											th:text="${#dates.format(item.created_at, 'dd/MMM/yyyy HH:mm')}"></td>
+										<td><button class="btn-delete btn btn-circle btn-danger">
+												<i class="fas fa-trash"></i>
+											</button></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<input type="hidden" th:field="*{id}" /> <input type="hidden"
+							th:field="*{user.id}" />
+						<div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger"
+							role="alert">
+							<ul class="pl-4 mb-0">
+								<li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+							</ul>
+						</div>
+						<button class="btn btn-success rounded-pill mt-1 btn-submit" type="submit">Save</button>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<div id="scripts">
+		<script src="https://media-library.cloudinary.com/global/all.js"></script>
+		<script th:inline="javascript">
+			$().ready(function(){
+				let config = { 
+						cloud_name: [[${@environment.getProperty('music.cloudinary.cloud_name')}]],
+	                    multiple: false,
+	                    username: [[${@environment.getProperty('music.cloudinary.username')}]],
+	                    timestamp: [[${timestamp}]],
+	                    signature: [[${signature}]],
+	                    api_key: [[${@environment.getProperty('music.cloudinary.api_key')}]],
+	                    folder: { path: 'music'}
+				};
+				
+				$('#btn-change-cover').click(function(e){
+					e.preventDefault();
+					let input = $('#cover');
+					cloudinary.openMediaLibrary(
+	                   config,
+	                    {
+	                        insertHandler: (data) => {
+	                            const url = data.assets[0].secure_url;
+	                            input.val(url);
+	                        }
+	                    }
+	                );
+				});
+				
+				$('#btn-change-lyric').click(function(e){
+					e.preventDefault();
+					let input = $('#lyric');
+					cloudinary.openMediaLibrary(
+	                   config,
+	                    {
+	                        insertHandler: (data) => {
+	                            const url = data.assets[0].secure_url;
+	                            input.val(url);
+	                        }
+	                    }
+	                );
+				});
+				
+				function bindBtnDelete(){
+					$('.form-table .btn-delete').off('click');
+					$('.form-table .btn-delete').click(function(e){
+						e.preventDefault();
+						$(this).parent().parent().remove();
+					});
+				}
+				
+				bindBtnDelete();
+				
+				$('.btn-add').click(function(e){
+					e.preventDefault();
+					cloudinary.openMediaLibrary(
+	                   {...config,  multiple: true},
+	                    {
+	                        insertHandler: (data) => {
+	                        	console.log(data);
+	                        	let trLength = $('.form-table tbody tr').length
+	                        	for(let item of data.assets){
+	                        		$('.form-table tbody').append(`<tr>
+		        							<td>${trLength + 1}</td>
+		        							<td><input class="form-control" style="width:250px" name="files[${trLength}].filename" value="${item.public_id}" type="text"/></td>
+											<td></td>
+											<td><a href="${item.secure_url}">Link</a></td>
+											<td>
+												<input name="files[${trLength}].enable" type="checkbox" checked="checked"/>
+												<input name="files[${trLength}].id" type="hidden"/>
+												<input name="files[${trLength}].url" value="${item.secure_url}" type="hidden"/>
+											</td>
+											<td></td>
+		        							<td><button class="btn-delete btn btn-circle btn-danger">
+		        									<i class="fas fa-trash"></i>
+		        								</button></td>
+		        					</tr>`);
+	                        		trLength++;
+	                        	}
+	        					bindBtnDelete();
+	                        }
+	                    }
+	                );
+				});
+				
+				$('.btn-submit').click(function(e){
+					e.preventDefault();
+					
+					let tr_arr = $('form .form-table tbody tr');
+					for(let i = 0; i < tr_arr.length; ++i){
+						let tr = tr_arr[i];
+						$(tr).find('input[name$=id]').attr('name', `files[${i}].id`);	
+						$(tr).find('input[name$=enable]').attr('name', `files[${i}].enable`);	
+						$(tr).find('input[name$=public_id]').attr('name', `files[${i}].public_id`);	
+						$(tr).find('input[name$=filename]').attr('name', `files[${i}].filename`);	
+					}
+					
+					$('#form-submit').submit();
+				});
+			});
+		</script>
+	</div>
+</body>
+</html>

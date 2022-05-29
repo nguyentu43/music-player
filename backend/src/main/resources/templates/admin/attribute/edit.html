@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html
+	th:replace="fragments/admin_layout :: admin_layout(title='Attribute', active_item='Attribute', main=~{::#main}, scripts=~{::#scripts})">
+<body>
+	<div class="container-fluid" id="main">
+		<h1 class="h3 mb-2 text-gray-800">Attribute</h1>
+		<div class="card shadow mb-4">
+			<!-- Card Header - Dropdown -->
+			<div
+				class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h6 class="m-0 font-weight-bold text-primary"
+					th:text="${attribute.id} == null ? 'Create Attribute' : 'Edit Attribute'">Create</h6>
+			</div>
+			<!-- Card Body -->
+			<div class="card-body">
+				<div class="col-sm-12 col-md-9">
+					<form class="user" id="form-submit" method="post" th:action="@{/admin/attribute/save}"
+						th:object="${attribute}">
+						<div class="form-group">
+						<label class="control-label">Attribute Name</label>
+							<input type="text" class="form-control form-control-user"
+								id="name" th:field="*{name}" placeholder="Name">
+						</div>
+						<div class="table-responsive" th:if="${attribute.id} != null">
+							<div class="d-flex justify-content-between mb-1 align-items-center">
+								<label class="control-label">Values</label>
+								<button class="btn-add btn btn-circle btn-primary">
+									<i class="fas fa-plus"></i>
+								</button>
+							</div>
+							
+							<table class="table table-bordered form-table" width="100%" cellspacing="0">
+								<thead>
+									<tr>
+										<th>Id</th>
+										<th>Name</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="item, state : ${attribute.attributeValues}">
+										<td th:text="${state.index + 1}">Tiger Nixon</td>
+										<td>
+											<input type="hidden" th:name="|attributeValues[__${state.index}__].id|" th:value="${item.id}"/>
+											<input type="text" class="form-control" th:name="|attributeValues[__${state.index}__].value|" th:value="${item.value}"/>
+										</td>
+										<td><button class="btn-delete btn btn-circle btn-danger">
+												<i class="fas fa-trash"></i>
+											</button></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<input type="hidden" th:field="*{id}" />
+						<div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger"
+							role="alert">
+							<ul class="pl-4 mb-0">
+								<li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+							</ul>
+						</div>
+						<button class="btn btn-success btn-submit rounded-pill" type="submit">Save</button>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<div id="scripts">
+		<script>
+			$().ready(function(){
+				
+				function bindBtnDelete(){
+					$('.form-table .btn-delete').off('click');
+					$('.form-table .btn-delete').click(function(e){
+						e.preventDefault();
+						$(this).parent().parent().remove();
+					});
+				}
+				
+				bindBtnDelete();
+				
+				$('.btn-add').click(function(e){
+					e.preventDefault();
+					let trLength = $('.form-table tbody tr').length;
+					$('.form-table tbody').append(`<tr>
+							<td>${trLength +1}</td>
+							<td>
+								<input type="hidden" name="attributeValues[${trLength}].id"/>
+								<input type="text" class="form-control" name="attributeValues[${trLength}].value"/>
+							</td>
+							<td><button class="btn-delete btn btn-circle btn-danger">
+									<i class="fas fa-trash"></i>
+								</button></td>
+					</tr>`);
+					bindBtnDelete();
+				});
+				
+				$('.btn-submit').click(function(e){
+					e.preventDefault();
+					
+					let tr_arr = $('form .form-table tbody tr');
+					for(let i = 0; i < tr_arr.length; ++i){
+						let tr = tr_arr[i];
+						$(tr).find('input[type=hidden]').attr('name', `attributeValues[${i}].id`);	
+						$(tr).find('input[type=text]').attr('name', `attributeValues[${i}].value`);	
+					}
+					
+					$('#form-submit').submit();
+				});
+			});
+		</script>
+	</div>
+</body>
+</html>

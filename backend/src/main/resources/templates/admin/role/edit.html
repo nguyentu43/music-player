@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html
+	th:replace="fragments/admin_layout :: admin_layout(title='Role', active_item='Role', main=~{::#main})">
+<body>
+	<div class="container-fluid" id="main">
+		<h1 class="h3 mb-2 text-gray-800">Role</h1>
+		<div class="card shadow mb-4">
+			<!-- Card Header - Dropdown -->
+			<div
+				class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h6 class="m-0 font-weight-bold text-primary" th:text="${role.id} == null ? 'Create Role' : 'Edit Role'">Role List</h6>
+			</div>
+			<!-- Card Body -->
+			<div class="card-body">
+			<div class="col-sm-12 col-md-9">
+				<form class="user" method="post" th:action="@{/admin/role/save}" th:object="${role}">
+					<div class="form-group">
+						<label>Role Name</label>
+						<input type="text" class="form-control form-control-user"
+							id="name" th:field="*{name}" placeholder="Role Name">
+					</div>
+					<input type="hidden" th:field="*{id}"/>
+					<div th:if="${#fields.hasAnyErrors()}"
+						class="alert alert-danger" role="alert">
+						<ul class="pl-4 mb-0">
+							<li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+						</ul>
+					</div>
+					<button class="btn btn-success rounded-pill" type="submit">Save</button>
+				</form>
+			</div>
+				
+			</div>
+		</div>
+	</div>
+</body>
+</html>

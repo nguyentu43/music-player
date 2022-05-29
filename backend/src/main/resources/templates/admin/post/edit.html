@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html
+	th:replace="fragments/admin_layout :: admin_layout(title='Post', active_item='Post', main=~{::#main}, scripts=~{::#scripts}, styles=~{::#styles})">
+<body>
+	<div id="styles">
+		<link th:href="@{/vendor/summernote/summernote-bs4.min.css}" rel="stylesheet" />
+	</div>
+	<div class="container-fluid" id="main">
+		<h1 class="h3 mb-2 text-gray-800">Post</h1>
+		<div class="card shadow mb-4">
+			<!-- Card Header - Dropdown -->
+			<div
+				class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+				<h6 class="m-0 font-weight-bold text-primary" th:text="${post.id} == null ? 'Create' : 'Edit'">Create</h6>
+			</div>
+			<!-- Card Body -->
+			<div class="card-body">
+			<div class="col-sm-12 col-md-9">
+				<form class="user" method="post" th:action="@{/admin/post/save}" th:object="${post}">
+					<div class="form-group">
+					<label class="control-label">Title</label>
+						<input type="text" class="form-control form-control-user"
+							id="title" th:field="*{title}" placeholder="Title">
+					</div>
+					<div class="form-group">
+					<label class="control-label">Slug</label>
+						<input type="text" class="form-control form-control-user"
+							id="slug" th:field="*{slug}" placeholder="Slug">
+					</div>
+					<div class="form-group" th:if="${post.id} != null">
+						<label class="control-label">Tags</label>
+						<select class="form-control form-control-user"
+								id="tagIds" th:field="*{tagIds}" multiple>
+							<option th:each="tag : ${tags}" th:value="${tag.id}" th:text="${tag.name}" th:selected="${#lists.contains(post.tagIds, tag.id)}"></option>
+						</select>
+					</div>
+					<label class="control-label">Content</label>
+					<div class="form-group">
+						<textarea type="text" class="form-control form-control-user"
+							id="content" th:field="*{content}" placeholder="Content"></textarea>
+					</div>
+					<input type="hidden" th:field="*{id}"/>
+					<input type="hidden" th:field="*{user.id}"/>
+					<div th:if="${#fields.hasAnyErrors()}"
+						class="alert alert-danger" role="alert">
+						<ul class="pl-4 mb-0">
+							<li th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+						</ul>
+					</div>
+					<button class="btn btn-success rounded-pill" type="submit">Save</button>
+				</form>
+			</div>
+				
+			</div>
+		</div>
+	</div>
+	<div id="scripts">
+		<script th:src="@{/vendor/summernote/summernote-bs4.min.js}"></script>
+		<script>
+			$().ready(function(){
+				$('textarea').summernote({height: 200});
+			});
+		</script>
+	</div>
+</body>
+</html>
