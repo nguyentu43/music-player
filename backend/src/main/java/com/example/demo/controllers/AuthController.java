@@ -55,7 +55,9 @@ public class AuthController {
 		}
 		
 		Role role = roleRepository.findByName("ROLE_USER");
-		userRepository.save(new User(register.getEmail(), register.getName(), passwordEncoder.encode(register.getPassword()), Arrays.asList(role)));
+		User newUser = new User(register.getEmail(), register.getName(), Arrays.asList(role));
+		newUser.setPassword(passwordEncoder.encode(register.getPassword()));
+		userRepository.save(newUser);
 		
 		return "redirect:/login";
 	}

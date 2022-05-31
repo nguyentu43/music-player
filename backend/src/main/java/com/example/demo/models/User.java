@@ -3,7 +3,9 @@ package com.example.demo.models;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,8 +24,14 @@ import javax.persistence.TemporalType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +43,8 @@ import lombok.RequiredArgsConstructor;
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class User implements UserDetails {
+@JsonIncludeProperties({"id", "name", "email"})
+public class User implements UserDetails, OidcUser {
 	/**
 	 *
 	 */
@@ -53,20 +62,19 @@ public class User implements UserDetails {
 	@Column(nullable = false)
 	private String name;
 
-	@NonNull
-	@JsonIgnore
 	@Column(nullable = false)
 	private String password;
+	
+	@Column(name = "oauth2_provider")
+	private String oauth2Provider;
 
-	@JsonIgnore
 	@NonNull
-	@ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role",
 		joinColumns = @JoinColumn(name="user_id"),
 		inverseJoinColumns = @JoinColumn(name="role_id"))
 	private List<Role> roles;
 
-	@JsonIgnore
 	@Column(columnDefinition = "timestamptz default now()", insertable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date created_at;
@@ -80,33 +88,54 @@ public class User implements UserDetails {
 		return authorities;
 	}
 
-	@JsonIgnore
 	@Override
 	public String getUsername() {
 		return email;
 	}
 
-	@JsonIgnore
 	@Override
 	public boolean isAccountNonExpired() {
 		return true;
 	}
 
-	@JsonIgnore
+	
 	@Override
 	public boolean isAccountNonLocked() {
 		return true;
 	}
 
-	@JsonIgnore
+	
 	@Override
 	public boolean isCredentialsNonExpired() {
 		return true;
 	}
 
-	@JsonIgnore
+	
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+
+	
+	@Override
+	public Map<String, Object> getAttributes() {
+		return new HashMap<>();
+	}
+
+	
+	@Override
+	public Map<String, Object> getClaims() {
+		return new HashMap<>();
+	}
+
+	
+	@Override
+	public OidcIdToken getIdToken() {
+		return null;
+	}
+
+	@Override
+	public OidcUserInfo getUserInfo() {
+		return null;
 	}
 }
